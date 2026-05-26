@@ -17,6 +17,23 @@ const db = await mysql.createConnection({
   database: process.env.DB_NAME,
 });
 
+const allowedOrigins = [process.env.BASE_URL].filter(Boolean);
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
 // CREATE QR
 app.post("/api/qr", async (req, res) => {
   const { name, destination } = req.body;
@@ -25,7 +42,7 @@ app.post("/api/qr", async (req, res) => {
 
   await db.query(
     "INSERT INTO qrcodes (qr_key, name, destination) VALUES (?, ?, ?)",
-    [qrKey, name, destination]
+    [qrKey, name, destination],
   );
 
   res.json({
@@ -46,10 +63,10 @@ app.put("/api/qr/:key", async (req, res) => {
   const { key } = req.params;
   const { destination } = req.body;
 
-  await db.query(
-    "UPDATE qrcodes SET destination=? WHERE qr_key=?",
-    [destination, key]
-  );
+  await db.query("UPDATE qrcodes SET destination=? WHERE qr_key=?", [
+    destination,
+    key,
+  ]);
 
   res.json({ success: true });
 });
@@ -58,10 +75,7 @@ app.put("/api/qr/:key", async (req, res) => {
 app.get("/qr/:key", async (req, res) => {
   const { key } = req.params;
 
-  const [rows] = await db.query(
-    "SELECT * FROM qrcodes WHERE qr_key=?",
-    [key]
-  );
+  const [rows] = await db.query("SELECT * FROM qrcodes WHERE qr_key=?", [key]);
 
   if (!rows.length) {
     return res.status(404).send("QR Not Found");
