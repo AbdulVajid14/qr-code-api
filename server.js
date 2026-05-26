@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import mysql from "mysql2/promise";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 
@@ -8,12 +11,11 @@ app.use(cors());
 app.use(express.json());
 
 const db = await mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "qrcode",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 });
-
 
 // CREATE QR
 app.post("/api/qr", async (req, res) => {
@@ -28,10 +30,9 @@ app.post("/api/qr", async (req, res) => {
 
   res.json({
     success: true,
-    qrUrl: `http://localhost:5000/qr/${qrKey}`,
+    qrUrl: `${process.env.BASE_URL}/qr/${qrKey}`,
   });
 });
-
 
 // GET ALL QR
 app.get("/api/qr", async (req, res) => {
@@ -39,7 +40,6 @@ app.get("/api/qr", async (req, res) => {
 
   res.json(rows);
 });
-
 
 // UPDATE DESTINATION
 app.put("/api/qr/:key", async (req, res) => {
@@ -53,7 +53,6 @@ app.put("/api/qr/:key", async (req, res) => {
 
   res.json({ success: true });
 });
-
 
 // REDIRECT
 app.get("/qr/:key", async (req, res) => {
@@ -71,6 +70,6 @@ app.get("/qr/:key", async (req, res) => {
   res.redirect(rows[0].destination);
 });
 
-app.listen(5000, () => {
-  console.log("Server running");
+app.listen(process.env.PORT, () => {
+  console.log(`Server running on port ${process.env.PORT}`);
 });
