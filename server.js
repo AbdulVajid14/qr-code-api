@@ -96,7 +96,10 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = [process.env.BASE_URL].filter(Boolean);
+const allowedOrigins = [
+  process.env.BASE_URL,
+  "https://qr-code-seven-ebon.vercel.app",
+].filter(Boolean);
 
 const corsOptions = {
   origin: function (origin, callback) {
