@@ -256,7 +256,7 @@ const app = express();
 
 const allowedOrigins = [
   process.env.BASE_URL,
-  "https://qr-code-seven-ebon.vercel.app",
+  "https://shopora-qr-code.vercel.app",
 ].filter(Boolean);
 
 app.use(cors({
